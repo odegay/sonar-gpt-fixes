@@ -6,7 +6,7 @@
 	Attempt to automate fixing issues found by Sonarqube
 </div>
 
-<h2> Windows users could use the docker container </h2>
+## Windows users could use the docker container
 <b>1. Clone the repo </b>
 ```sh
 git clone https://github.com/odegay/sonar-gpt-fixes.git
