@@ -7,16 +7,19 @@
 </div>
 
 ## Windows users could use the docker container
-**1. Clone the repo**
-**2. Build the image **
+<b>1. Clone the repo </b>
 ```sh
-docker build . -t sgf"</b>
+git clone https://github.com/odegay/sonar-gpt-fixes.git
 ```
-**3. Start the container with CLI **
+<b>2. Build the image </b>
+```sh
+docker build . -t sgf"
+```
+<b>3. Start the container with CLI </b>
 ```sh
 docker run --rm -it --name sgf --entrypoint bash sgf
 ```
-**4. If by any reason you lost your CLI connection use this command to get back **
+<b>4. If by any reason you lost your CLI connection use this command to get back to the container</b>
 ```sh
 shdocker exec -it sgf /bin/bash
 ```
