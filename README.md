@@ -6,12 +6,12 @@
 	Attempt to automate fixing issues found by Sonarqube
 </div>
 
-## Windows users could use the docker container
+<h2> Windows users could use the docker container </h2>
 <b>1. Clone the repo </b>
 ```sh
 git clone https://github.com/odegay/sonar-gpt-fixes.git
 ```
-<b>2. Build the image </b>
+<b>2. Build the image (get to the git directory first) </b>
 ```sh
 docker build . -t sgf"
 ```
@@ -21,6 +21,6 @@ docker run --rm -it --name sgf --entrypoint bash sgf
 ```
 <b>4. If by any reason you lost your CLI connection use this command to get back to the container</b>
 ```sh
-shdocker exec -it sgf /bin/bash
+docker exec -it sgf /bin/bash
 ```
 
