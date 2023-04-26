@@ -3,12 +3,21 @@
 </div>
 
 <div>
-	Attempt to automate code fixing of issues found by Sonarqube
+	Attempt to automate fixing issues found by Sonarqube
 </div>
 
 ## Windows users could use the docker container
-1. Clone the repo
-2. Build the image <b>dokcer build . -t sgf"</b>
-3. Start the container with CLI <b>docker run --rm -it --name sgf --entrypoint bash sgf</b>
-4. If by any reason you lost your CLI connection use this command to get back <b>docker exec -it sgf /bin/bash</b>
+**1. Clone the repo**
+**2. Build the image **
+```sh
+docker build . -t sgf"</b>
+```
+**3. Start the container with CLI **
+```sh
+docker run --rm -it --name sgf --entrypoint bash sgf
+```
+**4. If by any reason you lost your CLI connection use this command to get back **
+```sh
+shdocker exec -it sgf /bin/bash
+```
 
