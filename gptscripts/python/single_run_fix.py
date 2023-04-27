@@ -10,7 +10,6 @@ import time
 from git import Repo
 from datetime import datetime
 
-# DEV CONSTANTS
 # PROD CONSTANTS
 SONAR_API_URL = "https://sonarcloud.io/api"
 SONAR_ORG_KEY = os.environ["SONAR_ORGANIZATION_KEY"]
@@ -39,6 +38,7 @@ def fetch_issues(sonar_token, source_directory, branch):
                     "projects": SONAR_PROJECT_KEY,
                     "types": "CODE_SMELL, BUG, VULNERABILITY",
                     #"types": "BUG, VULNERABILITY",
+                    "branch": "main",
                     "statuses": "OPEN, CONFIRMED, REOPENED",
                     "p": page_index,
                 },
@@ -80,6 +80,7 @@ def fetch_issues(sonar_token, source_directory, branch):
         })
 
         page_index += 1
+    print(issues_by_file)
 
     return issues_by_file
 
@@ -245,14 +246,13 @@ def analyze_branch_with_sonarcloud(branch_name):
         else:
             print(f"Analysis task status: {task['status']} - waiting... (Elapsed time: {elapsed_time} seconds)")
 
-def create_pr(base, head, title, pr_results):
+def create_pr(base, head, title):
     url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO_NAME}/pulls"
     headers = {"Authorization": f"token {GITHUB_ACCESS_TOKEN}"}
     data = {
         "title": title,
         "head": head,
         "base": base,
-        "body": pr_results        
     }
 
     response = requests.post(url, headers=headers, json=data)
@@ -285,14 +285,14 @@ def create_and_checkout_new_branch(repo):
 
 def apply_fixes_and_push_changes(repo, new_branch):
     try:
-        issues_by_file = fetch_issues(SONAR_TOKEN, repo.working_dir, new_branch.name)        
+        issues_by_file = fetch_issues(SONAR_TOKEN, repo.working_dir, 'main')
         #implement_fixes(issues_by_file)
         implement_fixes_gpt_3_5_turbo(issues_by_file)
         repo.git.add(A=True)
         
         # Check if there are changes in the working tree
         if repo.is_dirty():
-            repo.git.commit(m='Apply automated fixes')
+            repo.git.commit(m='-=TEST SINGLE RUN=- Apply automated fixes')
             repo.git.push('--set-upstream', 'origin', new_branch.name)
         else:
             print("No changes to commit. Skipping this cycle...")
@@ -302,95 +302,6 @@ def apply_fixes_and_push_changes(repo, new_branch):
     except Exception as e:
         print(f"Error: Failed to push changes: {str(e)}")
         sys.exit(1)
-
-def get_workflow_run_status_and_conclusion(workflow_run_id):
-    headers = {
-        "Authorization": f"token {GITHUB_ACCESS_TOKEN}",
-        "Accept": "application/vnd.github+json",
-    }
-
-    url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO_NAME}/actions/runs/{workflow_run_id}"
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    json_data = response.json()
-    return json_data["status"], json_data["conclusion"]
-
-def find_latest_workflow_run(branch_name):
-    headers = {
-        "Authorization": f"token {GITHUB_ACCESS_TOKEN}",
-        "Accept": "application/vnd.github+json",
-    }
-
-    url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO_NAME}/actions/runs"
-    response = requests.get(url, headers=headers, params={"branch": branch_name})
-    response.raise_for_status()
-    json_data = response.json()
-
-    if not json_data["workflow_runs"]:
-        raise Exception("Error: No workflow runs found for the specified branch.")
-    print(f"Found {len(json_data['workflow_runs'])} workflow runs for branch '{branch_name}'")
-
-    latest_workflow_run = json_data["workflow_runs"][0]
-    return latest_workflow_run["id"]
-
-
-
-def wait_for_workflow_completion(workflow_run_id):
-    elapsed_time = 0
-    polling_interval = 10  # Adjust the polling interval if needed
-
-    while True:
-        time.sleep(POLLING_INTERVAL)
-        elapsed_time += POLLING_INTERVAL
-
-        status, conclusion = get_workflow_run_status_and_conclusion(workflow_run_id)
-        print(f"Workflow status: {status} (Elapsed time: {elapsed_time} seconds)")
-
-        if status == "completed":
-            if conclusion == "success":
-                break
-            elif conclusion == "failure":
-                raise Exception(f"Error: GitHub Actions workflow failed after {elapsed_time} seconds.")
-            else:
-                raise Exception(f"Error: GitHub Actions workflow completed with unexpected conclusion '{conclusion}' after {elapsed_time} seconds.")
-
-def trigger_github_actions_workflow(branch_name):
-    headers = {
-        "Authorization": f"token {GITHUB_ACCESS_TOKEN}",
-        "Accept": "application/vnd.github+json",
-    }
-
-    # Check for ongoing workflow runs on the given branch
-    check_runs_url = "https://api.github.com/repos/odegay/vanilla-nodejs-seed/actions/runs"
-    response = requests.get(
-        check_runs_url, 
-        headers=headers, 
-        params={
-        "branch": branch_name
-        }
-    )
-    response.raise_for_status()
-
-    runs_data = response.json()
-    ongoing_runs = [run for run in runs_data["workflow_runs"] if run["status"] in ["queued", "in_progress"]]
-
-    if ongoing_runs:
-        print(f"A workflow run is already in progress or queued for branch: {branch_name}")
-        return
-
-    workflow_dispatch_url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO_NAME}/actions/workflows/sonarcloud.yml/dispatches"
-    print(F"Triggering GitHub Actions workflow for branch: {branch_name}")
-    response = requests.post(
-        workflow_dispatch_url,
-        headers=headers,
-        json={
-            "ref": branch_name
-        }
-    )
-
-    response.raise_for_status()
-    print(f"Triggered GitHub Actions workflow for branch: {branch_name}")
-
 
 def main():
     print("************************************************************")
@@ -402,41 +313,15 @@ def main():
     with tempfile.TemporaryDirectory() as tmp_dir:
         repo = setup_git_repo(tmp_dir)
         new_branch = create_and_checkout_new_branch(repo)
+        issues_by_file = fetch_issues(SONAR_TOKEN, tmp_dir, "main")
 
-        # Implement continuous improvement cycles
-        cycle_count = 0
-        while True:
-            cycle_count += 1
-            if cycle_count >= MAX_CYCLES:
-                print(f"Error: Failed to fix all issues after {cycle_count} cycles. Stopping execution.")
-                sys.exit(1)
-            print("\n")
-            print("\n")
-            print("\n***********************************************************")
-            print(f"Starting cycle {cycle_count}...")
-            trigger_github_actions_workflow(new_branch.name)
-             # Add a sleep command to wait for the workflow to start
-            print("Waiting for GitHub Action to start...")
-            time.sleep(5)  # Adjust the sleep duration as needed
-            workflow_run_id = find_latest_workflow_run(new_branch.name)
-            wait_for_workflow_completion(workflow_run_id)
-            #analyze_branch_with_sonarcloud(new_branch.name)
-            issues_by_file = fetch_issues(SONAR_TOKEN, tmp_dir, new_branch.name)
+        # Call apply_fixes_and_push_changes and check if changes were committed and pushed
+        if not apply_fixes_and_push_changes(repo, new_branch):
+            raise Exception("GPT-4 failed to fix an issue and returned the same code. Stopping execution.")               
 
-            if not any(issues_by_file.values()):
-                print("No more issues found. Creating a PR...")
-                break
-                # Call apply_fixes_and_push_changes and check if changes were committed and pushed
-            if not apply_fixes_and_push_changes(repo, new_branch):
-                print("GPT-4 failed to fix an issue and returned the same code. Stopping execution.")
-                sys.exit(1)
-                #raise Exception("GPT-4 failed to fix an issue and returned the same code. Stopping execution.")
-            
-            print("Applied fixes and pushed changes. Repeating the process...")
-
-
-        pr = create_pr('main', new_branch.name, 'Apply automated fixes', 'This PR was created by the automated code fixer.')
+        pr = create_pr('main', new_branch.name, '-=TEST SINGLE RUN=- Apply automated fixes')
         print(f"Created PR: {pr['html_url']}")
+        print(f"Created PR: null")
 
 if __name__ == "__main__":
     main()

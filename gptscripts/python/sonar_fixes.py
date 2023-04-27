@@ -11,15 +11,14 @@ from datetime import datetime
 
 SONAR_API_URL = "https://sonarcloud.io/api"
 # PROD CONSTANTS
-SONAR_ORG_KEY = os.environ["SONAR_ORGANIZATION_KEY"]
-SONAR_PROJECT_KEY = os.environ["SONAR_PROJECT_KEY"]
-SONAR_TOKEN = os.environ["SONAR_TOKEN"]
-
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
-
-GITHUB_OWNER = os.environ["GITHUB_OWNER_ENV"]
-GITHUB_REPO_NAME = os.environ["GITHUB_REPO_NAME_ENV"]
-GITHUB_ACCESS_TOKEN = "os.environ['GITHUB_ACCESS_TOKEN_ENV']"
+# SONAR_ORG_KEY = os.environ["SONAR_ORGANIZATION_KEY"]
+# SONAR_PROJECT_KEY = os.environ["SONAR_PROJECT_KEY"]
+# SONAR_TOKEN = os.environ["SONAR_TOKEN"]
+# OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+# GITHUB_OWNER = os.environ["GITHUB_OWNER_ENV"]
+# GITHUB_REPO_NAME = os.environ["GITHUB_REPO_NAME_ENV"]
+# GITHUB_ACCESS_TOKEN = "os.environ['GITHUB_ACCESS_TOKEN_ENV']"
+# MAX_CYCLES = int(os.environ.get("MAX_CYCLES", 3))  # Default value is 3 cycles
 
 # DEV CONSTANTS
 
