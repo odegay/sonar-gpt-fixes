@@ -6,16 +6,16 @@
 </div>
 
 ## Installation steps
-This script is intended to run as a standole script or as a GitHub Action.
-Follow these steps to adjust your repository for the script:
-<b>1. Register at https://sonarcloud.io/ and connect it with your GitHub repository. Your rep should be public if you want to keep the free Plan</b>
-<b>2. Create a new organization and add your GitHub repository as a new project, create a token for your new project</b>
-<b>3. Pull out your OrganizationID and ProjectID from sonarcloud.io</b>
-<b>4. Register at https://platform.openai.com/ and get you OpenAI token</b>
-<b>5. Create secrets for you GitHub repository with following names (self-explanatory): <i>SONAR_TOKEN</i> <i>and OPENAI_TOKEN</i></b>
-<b>6. Put <i>sonar-project.properties (located in ./ghascripts)</i> to the root of your Repository and update the values in the file from the step 3</b>
-<b>5. Create <i>.github/workflows/</i> directory and put there <i>sonarcloud.yml</i>. This GitHub action triggers on push and starts the Sonar scan </b>
-<b>6. Run the script using options below</b>
+This Python script is intended to run as a standalone script.
+Follow these steps to make your repository ready for the script:<br>
+1. Register at https://sonarcloud.io/ and connect it with your GitHub repository. Your GitHub rep should be public if you want to keep the free Plan at SonarCloud<br>
+2. At SonarCloud create a token for your account (Account->Security->Generate token)<br>
+3. At SonarCloud Create a new organization and add your GitHub repository as a new project. Pull out your OrganizationID and ProjectID from Sonarcloud<br>
+4. Register at https://platform.openai.com/ and get you OpenAI token<br>
+5. Create secrets for you GitHub repository with following names (self-explanatory): <i>SONAR_TOKEN</i> <i>and OPENAI_TOKEN</i><br>
+6. Put <i>sonar-project.properties (located in ./ghascripts)</i> to the root of your Repository and update the values in the file from the step 3<br>
+5. Create <i>.github/workflows/</i> directory and put there <i>sonarcloud.yml</i>. This GitHub action will be triggered by the script and initiates the Sonar scan<br>
+6. Run the script using options below<br>
 
 ## How to run the script using docker container
 <b>1. Clone the repo </b>
