@@ -1,10 +1,8 @@
 import os
 import requests
-import json
 import openai
 import base64
 import sys
-import subprocess
 import tempfile
 import time
 import copy
