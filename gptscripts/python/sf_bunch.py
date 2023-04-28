@@ -11,18 +11,18 @@ import copy
 from git import Repo
 from datetime import datetime
 
-# DEV CONSTANTS
+# PROD CONSTANTS
 SONAR_API_URL = "https://sonarcloud.io/api"
-SONAR_ORG_KEY="odegay"
-SONAR_PROJECT_KEY="odegay_test-for-gpt"
-SONAR_TOKEN="51e806a91a7b38ce3ca008e7bbc95da4856a14a3"
-OPENAI_API_KEY = "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"
-GITHUB_OWNER = 'odegay'
-GITHUB_REPO_NAME = 'test-for-gpt'
-GITHUB_ACCESS_TOKEN = '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'
-GITHUB_USERNAME = "robot"
-GITHUB_EMAIL = "robot@noemail.com"
-MAX_CYCLES = 5  # Max number of cycles to run the script
+SONAR_ORG_KEY = os.environ["SONAR_ORGANIZATION_KEY"]
+SONAR_PROJECT_KEY = os.environ["SONAR_PROJECT_KEY"]
+SONAR_TOKEN = os.environ["SONAR_TOKEN"]
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+GITHUB_OWNER = os.environ["GITHUB_OWNER_ENV"]
+GITHUB_REPO_NAME = os.environ["GITHUB_REPO_NAME_ENV"]
+GITHUB_ACCESS_TOKEN = "os.environ['GITHUB_ACCESS_TOKEN_ENV']"
+GITHUB_USERNAME = os.environ["GITHUB_USERNAME_ENV"]
+GITHUB_EMAIL = os.environ["GITHUB_EMAIL_ENV"]
+MAX_CYCLES = int(os.environ.get("MAX_CYCLES", 3))  # Default value is 3 cycles
 POLLING_INTERVAL = 15  # Seconds to wait between polling for new issues
 
 
