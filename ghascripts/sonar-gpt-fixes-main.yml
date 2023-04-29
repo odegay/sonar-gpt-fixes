@@ -17,16 +17,24 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: 3.9
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r gptscripts/requirements.txt
 
-      - name: Run GPT Fixes script
-        run: python sf_bunch.py
+      - name: Run GPT Fixes script        
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SOURCE_BRANCH: ${{ github.head_ref }}
+          SONAR_ORG_KEY: "odegay"
+          SONAR_PROJECT_KEY: "odegay_test-for-gpt"                    
+          GITHUB_OWNER: "odegay"
+          GITHUB_REPO_NAME: "test-for-gpt"          
+          GITHUB_USERNAME: "robot"
+          GITHUB_EMAIL: "robot@noemail.com"          
+          MAX_CYCLES: 5
+        run: python gptscripts/gpt-sonar-fixes-gha.py
