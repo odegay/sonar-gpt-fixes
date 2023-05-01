@@ -23,7 +23,6 @@ GITHUB_EMAIL = os.environ["GITHUB_EMAIL_ENV"]
 MAX_CYCLES = int(os.environ.get("MAX_CYCLES", 3))  # Default value is 3 cycles
 POLLING_INTERVAL = 15  # Seconds to wait between polling for new issues
 
-
 def fetch_issues(sonar_token, source_directory, branch):    
     auth_header = base64.b64encode(f"{sonar_token}:".encode()).decode()
 

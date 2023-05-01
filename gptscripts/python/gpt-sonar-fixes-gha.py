@@ -11,7 +11,7 @@ from datetime import datetime
 
 # PROD CONSTANTS
 SONAR_API_URL = "https://sonarcloud.io/api"
-SONAR_ORG_KEY = os.environ["SONAR_ORGANIZATION_KEY"]
+SONAR_ORG_KEY = os.environ["SONAR_ORG_KEY"]
 SONAR_PROJECT_KEY = os.environ["SONAR_PROJECT_KEY"]
 SONAR_TOKEN = os.environ["SONAR_TOKEN"]
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
