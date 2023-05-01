@@ -379,12 +379,12 @@ def trigger_github_actions_workflow(branch_name):
         return
 
     workflow_dispatch_url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO_NAME}/actions/workflows/sonarcloud.yml/dispatches"
-    print(F"Triggering GitHub Actions workflow for branch: {branch_name}")
+    print(f"Triggering GitHub Actions workflow for branch: {branch_name}")
     response = requests.post(
         workflow_dispatch_url,
         headers=headers,
         json={
-            "ref": branch_name
+            "ref": "main"
         }
     )
 
