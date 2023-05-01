@@ -384,7 +384,7 @@ def trigger_github_actions_workflow(branch_name):
         workflow_dispatch_url,
         headers=headers,
         json={
-            "ref": "main"
+            "ref": branch_name
         }
     )
 
