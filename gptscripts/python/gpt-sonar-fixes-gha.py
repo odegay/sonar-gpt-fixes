@@ -15,13 +15,14 @@ SONAR_ORG_KEY = os.environ["SONAR_ORG_KEY"]
 SONAR_PROJECT_KEY = os.environ["SONAR_PROJECT_KEY"]
 SONAR_TOKEN = os.environ["SONAR_TOKEN"]
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
-GITHUB_OWNER = os.environ["GITHUB_OWNER_ENV"]
-GITHUB_REPO_NAME = os.environ["GITHUB_REPO_NAME_ENV"]
-GITHUB_ACCESS_TOKEN = "os.environ['GITHUB_ACCESS_TOKEN_ENV']"
-GITHUB_USERNAME = os.environ["GITHUB_USERNAME_ENV"]
-GITHUB_EMAIL = os.environ["GITHUB_EMAIL_ENV"]
+GITHUB_OWNER = os.environ["GITHUB_OWNER"]
+GITHUB_REPO_NAME = os.environ["GITHUB_REPO_NAME"]
+GITHUB_ACCESS_TOKEN = "os.environ['GITHUB_TOKEN']"
+GITHUB_USERNAME = os.environ["GITHUB_USERNAME"]
+GITHUB_EMAIL = os.environ["GITHUB_EMAIL"]
 MAX_CYCLES = 5  # Max number of cycles to run the script
 POLLING_INTERVAL = 15  # Seconds to wait between polling for new issues
+SOURCE_BRANCH = os.environ["SOURCE_BRANCH"]
 
 
 def fetch_issues(sonar_token, source_directory, branch):    
