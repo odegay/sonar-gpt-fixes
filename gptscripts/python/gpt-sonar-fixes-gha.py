@@ -103,7 +103,7 @@ def generate_all_issues_prompt(file_content, issues):
     #return f"##### The SonarCloud found the following issue:\n{issue_text}\nFix the issue for the code below (with line numbers) and return the corrected code. Remove line numbers in your response \n### Code with issues\n{numbered_file_content}\n \n### Fixed Code that addresses the issue:"
     #return f"##### The SonarCloud found the following issue:\n### {issue_text}\n The code with the issue is provided below with line numbers. Fix the issue, and return the corrected code without line numbers\n### Code with issues\n{numbered_file_content}\n \n### Fixed Code:"
     #return f"#### In the code below fix the following issue:\n### {issues_text}\n The code with the issue is provided below with line numbers. Fix the issue, and return the corrected code without line numbers\n### Code with issues\n{numbered_file_content}\n \n### Fixed Code:"
-    return f"#### In the code below fix the following issue:\n### {issues_text}\n The code with the issue is provided below with line numbers. Fix the issue, and return the corrected code only without line numbers\n### Code with issues\n{numbered_file_content}\n \n### Fixed Code:"
+    return f"#### In the code below fix following issues:\n### {issues_text}\n The code with issues is provided below with line numbers. Fix issues, and return the corrected code only without line numbers\n### Code with issues\n{numbered_file_content}\n \n### Fixed Code:"
 
 def generate_prompt(file_content, issue):
     return f"##### The SonarCloud found the following issue on line {issue['line']}: {issue['message']}\n \n### Code with issues\n{file_content}\n \n### Fixed Code that only contains fixed block of lines of code and not the entire code:"
@@ -448,7 +448,7 @@ def main():
             cycle_count += 1
             if cycle_count >= MAX_CYCLES:
                 print(f"Error: Failed to fix all issues after {cycle_count} cycles. Stopping execution.")
-                sys.exit(1)
+                break
             print("\n")
             print("\n")
             print("\n***********************************************************")
@@ -470,7 +470,7 @@ def main():
                 # Call apply_fixes_and_push_changes and check if changes were committed and pushed
             if not apply_fixes_and_push_changes(repo, new_branch):
                 print("GPT-4 failed to fix an issue and returned the same code. Stopping execution.")
-                sys.exit(1)
+                break
                 #raise Exception("GPT-4 failed to fix an issue and returned the same code. Stopping execution.")
             
             print("Applied fixes and pushed changes. Repeating the process...")

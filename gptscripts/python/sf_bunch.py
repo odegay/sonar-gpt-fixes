@@ -466,7 +466,7 @@ def main():
                 break
                 # Call apply_fixes_and_push_changes and check if changes were committed and pushed
             if not apply_fixes_and_push_changes(repo, new_branch):
-                print("GPT-4 failed to fix an issue and returned the same code. Stopping execution.")
+                print("GPT-4 failed to fix issues and returned the same code. Stopping execution.")
                 sys.exit(1)
                 #raise Exception("GPT-4 failed to fix an issue and returned the same code. Stopping execution.")
             
