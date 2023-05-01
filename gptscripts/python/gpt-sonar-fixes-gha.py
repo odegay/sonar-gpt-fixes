@@ -361,7 +361,7 @@ def trigger_github_actions_workflow(branch_name):
     }
 
     # Check for ongoing workflow runs on the given branch
-    check_runs_url = "https://api.github.com/repos/odegay/vanilla-nodejs-seed/actions/runs"
+    check_runs_url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO_NAME}/actions/runs"
     response = requests.get(
         check_runs_url, 
         headers=headers, 
