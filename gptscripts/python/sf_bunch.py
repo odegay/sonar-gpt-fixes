@@ -258,7 +258,8 @@ def create_pr(base, head, title, pr_results):
     return response.json()
 
 def setup_git_repo(tmp_dir):
-    repo_url = f'https://{GITHUB_ACCESS_TOKEN}@github.com/{GITHUB_OWNER}/{GITHUB_REPO_NAME}.git'
+    # repo_url = f'https://{GITHUB_ACCESS_TOKEN}@github.com/{GITHUB_OWNER}/{GITHUB_REPO_NAME}.git'
+    repo_url = f'https://x-access-token:{GITHUB_ACCESS_TOKEN}@github.com/{GITHUB_OWNER}/{GITHUB_REPO_NAME}.git'
     repo = Repo.clone_from(repo_url, tmp_dir, branch='main')
 
     # Fetch all remote branches
