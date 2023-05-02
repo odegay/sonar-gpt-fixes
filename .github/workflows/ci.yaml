@@ -49,6 +49,9 @@ jobs:
       - name: Push the changes
         run: |
           cd "${RUNNER_TEMP}"/result
+          git config --global user.email "noreply@example.com"
+          git config --global user.name "OpenAI GPT"
+
           git add .
           git commit -m 'chore: fixes from GPT'
           git push --set-upstream origin fix/main
