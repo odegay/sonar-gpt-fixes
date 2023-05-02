@@ -13,6 +13,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Checkout new copy to work with
+        id: checkout_branch
+        run: |
+          cd "${RUNNER_TEMP}"
+          git clone "https://o-kasian:${{ secrets.PAT_TOKEN }}@github.com/${GITHUB_REPOSITORY}" result
+          git checkout -b fix/main
+          echo "output_dir=${RUNNER_TEMP}/result" >> $GITHUB_OUTPUT
+
       - name: Gradle
         run: |
           cd ./java-app
@@ -25,12 +33,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Checkout new copy to work with
-        run: |
-          cd "${{ env.RUNNER_TEMP }}"
-          git clone "https://o-kasian:${{ secrets.PAT_TOKEN }}@github.com/${{ env.GITHUB_REPOSITORY }}" result
-          git checkout -b fix/main
-
       - name: OpenAI GPT fix
         uses: ./action
         with:
@@ -40,12 +42,12 @@ jobs:
           sonar-url: https://sonarcloud.io/api/
           openai-token: ${{ secrets.OPENAI_TOKEN }}
           github-token: ${{ secrets.PAT_TOKEN }}
-          sources-dir: ${{ env.GITHUB_WORKSPACE }}
-          output-dir: ${{ env.RUNNER_TEMP }}/result
+          sources-dir: ${{ github.workspace }}
+          output-dir: ${{ steps.checkout_branch.outputs.output_dir }}/result
 
-      - name: Checkout new copy to work with
+      - name: Push the changes
         run: |
-          cd "${{ env.RUNNER_TEMP }}"/result
+          cd "${RUNNER_TEMP}"/result
           git add .
           git commit -m 'chore: fixes from GPT'
           git push --set-upstream origin fix/main
