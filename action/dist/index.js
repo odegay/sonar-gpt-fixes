@@ -17189,6 +17189,7 @@ const path = __nccwpck_require__(1017);
 const config = __nccwpck_require__(4570);
 const constructSonarQubeClient = __nccwpck_require__(2309);
 const constructOpenAiClient = __nccwpck_require__(2151);
+const core = __nccwpck_require__(2186);
 
 const sonar = constructSonarQubeClient(config);
 const openAi = constructOpenAiClient(config);

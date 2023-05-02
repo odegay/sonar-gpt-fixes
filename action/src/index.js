@@ -3,6 +3,7 @@ const path = require('path');
 const config = require("./config");
 const constructSonarQubeClient = require("./sonar");
 const constructOpenAiClient = require("./openai");
+const core = require('@actions/core');
 
 const sonar = constructSonarQubeClient(config);
 const openAi = constructOpenAiClient(config);
