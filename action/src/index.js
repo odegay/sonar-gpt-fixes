@@ -57,7 +57,7 @@ const run = async() => {
     //write files in new branch
     //TODO: git checkout to new folder, change there
     for (const i in fixes) {
-        await writeFile(config.outputDor, fixes[i]);
+        await writeFile(config.outputDir, fixes[i]);
     }
 
     //output number of files changed
