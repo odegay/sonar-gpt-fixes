@@ -27,7 +27,7 @@ jobs:
 
       - name: Checkout new copy to work with
         run: |
-          cd "${{ RUNNER_TEMP }}"
+          cd "${{ env.RUNNER_TEMP }}"
           git clone "https://o-kasian:${{ secrets.PAT_TOKEN }}@github.com/${{ GITHUB_REPOSITORY }}" result
           git checkout -b fix/main
 
@@ -41,11 +41,11 @@ jobs:
           openai-token: ${{ secrets.OPENAI_TOKEN }}
           github-token: ${{ secrets.PAT_TOKEN }}
           sources-dir: ${{ env.GITHUB_WORKSPACE }}
-          output-dir: ${{ RUNNER_TEMP }}/result
+          output-dir: ${{ env.RUNNER_TEMP }}/result
 
       - name: Checkout new copy to work with
         run: |
-          cd "${{ RUNNER_TEMP }}"/result
+          cd "${{ env.RUNNER_TEMP }}"/result
           git add .
           git commit -m 'chore: fixes from GPT'
           git push --set-upstream origin fix/main
