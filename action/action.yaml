@@ -1,0 +1,26 @@
+name: GitHub Script
+author: GitHub
+description: Run OpenAI GPT model to fix sonarqube findings
+inputs:
+  sonar-token:
+    required: true
+  sonar-project-key:
+    required: true
+  sonar-branch:
+    required: true
+  sonar-url:
+    required: true
+  openai-token:
+    required: true
+  github-token:
+    required: true
+  sources-dir:
+    required: true
+  output-dir:
+    required: true
+outputs:
+  files-changed:
+    description: The Number of files changed
+runs:
+  using: node18
+  main: dist/index.js

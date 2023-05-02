@@ -24,3 +24,28 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Checkout new copy to work with
+        run: |
+          cd "${{ RUNNER_TEMP }}"
+          git clone "https://o-kasian:${{ secrets.PAT_TOKEN }}@github.com/${{ GITHUB_REPOSITORY }}" result
+          git checkout -b fix/main
+
+      - name: OpenAI GPT fix
+        uses: ./action
+        with:
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+          sonar-project-key: o-kasian_sonar-gpt-fixes
+          sonar-branch: main
+          sonar-url: https://sonarcloud.io/api/
+          openai-token: ${{ secrets.OPENAI_TOKEN }}
+          github-token: ${{ secrets.PAT_TOKEN }}
+          sources-dir: ${{ env.GITHUB_WORKSPACE }}
+          output-dir: ${{ RUNNER_TEMP }}/result
+
+      - name: Checkout new copy to work with
+        run: |
+          cd "${{ RUNNER_TEMP }}"/result
+          git add .
+          git commit -m 'chore: fixes from GPT'
+          git push --set-upstream origin fix/main
