@@ -1,4 +1,5 @@
 const { Configuration, OpenAIApi } = require("openai");
+const fetch = require("node-fetch");
 
 const generateSystemMessage = () => {
     return "You are a helpful assistant.";

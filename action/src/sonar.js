@@ -1,5 +1,6 @@
 const { posix } = require("path");
 const { stringify } = require('node:querystring');
+const fetch = require("node-fetch");
 
 const constructSonarQubeClient = (config) => {
     const baseUrl = new URL(config.sonarUrl).origin;
