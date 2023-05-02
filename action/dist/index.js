@@ -14067,6 +14067,8 @@ const loadFile = async(filename) => {
 
 const writeFile = async(rootDir, { filename, content }) => {
     const filePath = path.join(rootDir, filename);
+    const fileDir = path.dirname(filePath);
+    fs.mkdirSync(fileDir, { recursive: true });
     await fs.promises.writeFile(filePath, content, 'utf-8');
 }
 
