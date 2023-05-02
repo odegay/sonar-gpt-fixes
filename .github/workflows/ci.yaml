@@ -28,7 +28,7 @@ jobs:
       - name: Checkout new copy to work with
         run: |
           cd "${{ env.RUNNER_TEMP }}"
-          git clone "https://o-kasian:${{ secrets.PAT_TOKEN }}@github.com/${{ GITHUB_REPOSITORY }}" result
+          git clone "https://o-kasian:${{ secrets.PAT_TOKEN }}@github.com/${{ env.GITHUB_REPOSITORY }}" result
           git checkout -b fix/main
 
       - name: OpenAI GPT fix
