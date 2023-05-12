@@ -10,7 +10,6 @@ import time
 from git import Repo
 from datetime import datetime
 
-# DEV CONSTANTS
 # PROD CONSTANTS
 SONAR_API_URL = "https://sonarcloud.io/api"
 SONAR_ORG_KEY = os.environ["SONAR_ORGANIZATION_KEY"]
