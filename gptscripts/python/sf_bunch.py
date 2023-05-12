@@ -11,17 +11,18 @@ from datetime import datetime
 
 # PROD CONSTANTS
 SONAR_API_URL = "https://sonarcloud.io/api"
-SONAR_ORG_KEY="odegay"
-SONAR_PROJECT_KEY="odegay_test-for-gpt"
-SONAR_TOKEN="8b279bd33a3bf127fec4dfb1136475ffd9652e4c"
-OPENAI_API_KEY = "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"
-GITHUB_OWNER = 'odegay'
-GITHUB_REPO_NAME = 'test-for-gpt'
-GITHUB_ACCESS_TOKEN = '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'
-GITHUB_USERNAME = "robot"
-GITHUB_EMAIL = "robot@noemail.com"
+SONAR_ORG_KEY = os.environ["SONAR_ORG_KEY"]
+SONAR_PROJECT_KEY = os.environ["SONAR_PROJECT_KEY"]
+SONAR_TOKEN = os.environ["SONAR_TOKEN"]
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+GITHUB_OWNER = os.environ["GITHUB_OWNER"]
+GITHUB_REPO_NAME = os.environ["GITHUB_REPO_NAME"]
+GITHUB_ACCESS_TOKEN = os.environ["GITHUB_TOKEN"]
+GITHUB_USERNAME = os.environ["GITHUB_USERNAME"]
+GITHUB_EMAIL = os.environ["GITHUB_EMAIL"]
 MAX_CYCLES = 5  # Max number of cycles to run the script
 POLLING_INTERVAL = 15  # Seconds to wait between polling for new issues
+SOURCE_BRANCH = os.environ["SOURCE_BRANCH"]
 
 def fetch_issues(sonar_token, source_directory, branch):    
     auth_header = base64.b64encode(f"{sonar_token}:".encode()).decode()
