@@ -37,7 +37,6 @@ def fetch_issues(sonar_token, source_directory, branch):
                     "organization": SONAR_ORG_KEY,
                     "projects": SONAR_PROJECT_KEY,
                     "types": "CODE_SMELL, BUG, VULNERABILITY",
-                    #"types": "BUG, VULNERABILITY",
                     "statuses": "OPEN, CONFIRMED, REOPENED",
                     "p": page_index,
                 },
@@ -84,78 +83,16 @@ def fetch_issues(sonar_token, source_directory, branch):
 
 # Generate the prompt for fixing all issues at once
 def generate_all_issues_prompt(file_content, issues):
-#    issues_text = "\n".join([f"Line {issue['line']}: {issue['message']}" for issue in issues])
-#    return f"##### The SonarCloud found the following issues:\n{issues_text}\n \n### Code with issues\n{file_content}\n \n### Fixed Code that addresses all issues:"    
     # Add line numbers to the original code
     numbered_lines = [f"{i+1}: {line}" for i, line in enumerate(file_content.splitlines())]
     numbered_file_content = "\n".join(numbered_lines)
-    
-
     issues_text = "\n".join([f"Line {issue['line']}: {issue['message']}" for issue in issues])
-
-    # if issues:
-    #     first_issue = issues[0]
-    #     issue_text = f"Line {first_issue['line']}: {first_issue['message']}"
-    # else:
-    #     issue_text = "No issues found."
-
-
     #return f"##### The SonarCloud found the following issue:\n{issue_text}\nFix the issue for the code below (with line numbers) and return the corrected code. Remove line numbers in your response \n### Code with issues\n{numbered_file_content}\n \n### Fixed Code that addresses the issue:"
     #return f"##### The SonarCloud found the following issue:\n### {issue_text}\n The code with the issue is provided below with line numbers. Fix the issue, and return the corrected code without line numbers\n### Code with issues\n{numbered_file_content}\n \n### Fixed Code:"
     #return f"#### In the code below fix the following issue:\n### {issues_text}\n The code with the issue is provided below with line numbers. Fix the issue, and return the corrected code without line numbers\n### Code with issues\n{numbered_file_content}\n \n### Fixed Code:"
     return f"#### In the code below fix following issues:\n### {issues_text}\n The code with issues is provided below with line numbers. Fix issues, and return the corrected code only without line numbers\n### Code with issues\n{numbered_file_content}\n \n### Fixed Code:"
 
-def generate_prompt(file_content, issue):
-    return f"##### The SonarCloud found the following issue on line {issue['line']}: {issue['message']}\n \n### Code with issues\n{file_content}\n \n### Fixed Code that only contains fixed block of lines of code and not the entire code:"
-
-def apply_suggested_fix(file_content, issue, suggested_fix):
-    lines = file_content.split('\n')
-    issue_line = issue['line'] - 1
-    suggested_lines = suggested_fix.split('\n')
-
-    # Replace the affected lines with the suggested fix lines
-    lines[issue_line : issue_line + len(suggested_lines)] = suggested_lines
-
-    return '\n'.join(lines)
-
-# Implement fixes using the GPT-4 API for all issues at once
-def implement_fixes(issues_by_file):
-    openai.api_key = OPENAI_API_KEY
-
-    for file_path, issues in issues_by_file.items():
-        # Read the file contents
-        with open(file_path, 'r') as file:
-            file_content = file.read()
-
-        # Generate the prompt using the current file_content
-        prompt = generate_all_issues_prompt(file_content, issues)
-        print(f"\n")
-        print(f"\n****************************************************************************************************")
-        print(f"Generating suggestion for the following file: {file_path}")
-        print(f"\n")
-        print(f"Prompt: {prompt}")
-        try:
-            response = openai.Completion.create(
-                model="text-davinci-003",
-                prompt=prompt,
-                temperature=0,
-                max_tokens=3000,
-                top_p=1.0,
-                frequency_penalty=0.0,
-                presence_penalty=0.0,
-                stop=["###"]
-            )
-            suggested_fix = response.choices[0].text.strip()
-            print(f"Suggested fix for issues '{issues}': {response}")
-        except Exception as e:
-            print(f"Error: Failed to get a suggestion from GPT-4 for issues '{issues}': {str(e)}")
-            continue
-
-        # Write the suggested fix directly back to the file
-        with open(file_path, 'w') as file:
-            file.write(suggested_fix)
-            print(f"Updated file: {file_path}")
-
+# Implement fixes using the GPT-4 3.5 turbo API for all issues at once
 def implement_fixes_gpt_3_5_turbo(issues_by_file):
     openai.api_key = OPENAI_API_KEY
 
@@ -253,7 +190,6 @@ def create_pr(base, head, title, pr_results):
         "base": base,
         "body": pr_results        
     }
-
     response = requests.post(url, headers=headers, json=data)
     response.raise_for_status()
 
