@@ -20,7 +20,7 @@ GITHUB_REPO_NAME = os.environ["GITHUB_REPO_NAME"]
 GITHUB_ACCESS_TOKEN = os.environ["GITHUB_TOKEN"]
 GITHUB_USERNAME = os.environ["GITHUB_USERNAME"]
 GITHUB_EMAIL = os.environ["GITHUB_EMAIL"]
-MAX_CYCLES = 5  # Max number of cycles to run the script
+MAX_CYCLES = 2  # Max number of cycles to run the script
 POLLING_INTERVAL = 15  # Seconds to wait between polling for new issues
 SOURCE_BRANCH = os.environ["SOURCE_BRANCH"]
 
@@ -87,48 +87,73 @@ def generate_all_issues_prompt(file_content, issues):
     numbered_lines = [f"{i+1}: {line}" for i, line in enumerate(file_content.splitlines())]
     numbered_file_content = "\n".join(numbered_lines)
     issues_text = "\n".join([f"Line {issue['line']}: {issue['message']}" for issue in issues])
-    #return f"##### The SonarCloud found the following issue:\n{issue_text}\nFix the issue for the code below (with line numbers) and return the corrected code. Remove line numbers in your response \n### Code with issues\n{numbered_file_content}\n \n### Fixed Code that addresses the issue:"
-    #return f"##### The SonarCloud found the following issue:\n### {issue_text}\n The code with the issue is provided below with line numbers. Fix the issue, and return the corrected code without line numbers\n### Code with issues\n{numbered_file_content}\n \n### Fixed Code:"
-    #return f"#### In the code below fix the following issue:\n### {issues_text}\n The code with the issue is provided below with line numbers. Fix the issue, and return the corrected code without line numbers\n### Code with issues\n{numbered_file_content}\n \n### Fixed Code:"
     return f"#### In the code below fix following issues:\n### {issues_text}\n The code with issues is provided below with line numbers. Fix issues, and return the corrected code only without line numbers\n### Code with issues\n{numbered_file_content}\n \n### Fixed Code:"
+
+def get_issues_for_entity(entity, issues):
+    """
+    Returns the list of issues that are associated with a given entity.
+
+    Parameters:
+    - entity: A tuple of (entity_code, entity_serial_number)
+    - issues: A list of issues in the file. Each issue is a dictionary that includes a 'line' key.
+
+    Returns:
+    - A list of issues that are associated with the given entity.
+    """
+    entity_code, entity_serial_number = entity
+    entity_start_line, entity_end_line = code_analyzer.get_entity_line_range(entity_serial_number)
+
+    entity_issues = [issue for issue in issues if entity_start_line <= issue['line'] <= entity_end_line]
+
+    return entity_issues
 
 # Implement fixes using the GPT-4 3.5 turbo API for all issues at once
 def implement_fixes_gpt_3_5_turbo(issues_by_file):
     openai.api_key = OPENAI_API_KEY
 
     for file_path, issues in issues_by_file.items():
-        # Read the file contents        
-        with open(file_path, 'r') as file:
-            file_content = file.read()
+        # Instantiate the CodeAnalyzer for this file
+        language = get_language(os.path.splitext(file_path)[1][1:])  # Get language based on the file extension
+        code_analyzer = CodeAnalyzer(language, file_path)
 
-        # Generate the prompt using the current file_content
-        prompt = generate_all_issues_prompt(file_content, issues)
-        print(f"\n")
-        print(f"\n****************************************************************************************************")
-        print(f"Generating suggestion for the following file: {file_path}")
-        print(f"\n")
-        print(f"Prompt: {prompt}")
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=3000,
-                stop=["###"]
-            )
-            suggested_fix = response.choices[0].message['content'].strip()
-            print(f"Suggested fix for issues '{issues}': {response}")
-        except Exception as e:
-            print(f"Error: Failed to get a suggestion from GPT-4 for issues '{issues}': {str(e)}")
-            continue
+        # Process each entity
+        for entity, entity_serial_number in code_analyzer.extract_entities():
+            entity_issues = get_issues_for_entity(entity, issues)
+            if not entity_issues:
+                continue
 
-        # Write the suggested fix directly back to the file
+            # Generate the prompt using the current entity_content
+            prompt = generate_all_issues_prompt(entity, entity_issues)
+            print(f"\n")
+            print(f"\n****************************************************************************************************")
+            print(f"Generating suggestion for entity {entity_serial_number} in file: {file_path}")
+            print(f"\n")
+            print(f"Prompt: {prompt}")
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=3000,
+                    stop=["###"]
+                )
+                suggested_fix = response.choices[0].message['content'].strip()
+                print(f"Suggested fix for issues '{entity_issues}': {response}")
+
+                # Update the entity code with the suggested fix
+                code_analyzer.update_entity_code(entity_serial_number, suggested_fix)
+                
+            except Exception as e:
+                print(f"Error: Failed to get a suggestion from GPT-4 for issues '{entity_issues}': {str(e)}")
+                continue
+
+        # Write the updated source code back to the file
+        updated_source_code = code_analyzer.get_source_code_as_string()
         with open(file_path, 'w') as file:
-            file.write(suggested_fix)
+            file.write(updated_source_code)
             print(f"Updated file: {file_path}")
-
 
 def analyze_branch_with_sonarcloud(branch_name):
     sonar_api_base_url = "https://sonarcloud.io/api"    

@@ -13,6 +13,40 @@ class CodeAnalyzer:
         # Dictionary mapping entity serial number to updated code
         self.updated_entities = {}
 
+    def get_entity_line_range(self, entity_serial_number):
+        """
+        Returns the start and end line numbers for an entity given its serial number.
+
+        Parameters:
+        - entity_serial_number: The serial number of the entity.
+
+        Returns:
+        - A tuple of two integers (start_line, end_line).
+        """
+        entity_node = self.root_node.children[entity_serial_number]
+        start_line, _ = entity_node.start_point
+        end_line, _ = entity_node.end_point
+
+        return start_line, end_line
+
+    def get_issues_for_entity(self, entity, issues):
+        """
+        Returns the list of issues that are associated with a given entity.
+
+        Parameters:
+        - entity: A tuple of (entity_code, entity_serial_number)
+        - issues: A list of issues in the file. Each issue is a dictionary that includes a 'line' key.
+
+        Returns:
+        - A list of issues that are associated with the given entity.
+        """
+        entity_code, entity_serial_number = entity
+        entity_start_line, entity_end_line = self.get_entity_line_range(entity_serial_number)
+
+        entity_issues = [issue for issue in issues if entity_start_line <= issue['line'] <= entity_end_line]
+
+        return entity_issues
+
     def update_entity_code(self, entity_serial_number, updated_code):
         """Updates the code of an entity with a given serial number"""
         self.updated_entities[entity_serial_number] = updated_code

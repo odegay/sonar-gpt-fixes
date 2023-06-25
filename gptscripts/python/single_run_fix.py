@@ -12,15 +12,15 @@ from datetime import datetime
 
 # PROD CONSTANTS
 SONAR_API_URL = "https://sonarcloud.io/api"
-SONAR_ORG_KEY = os.environ["SONAR_ORGANIZATION_KEY"]
+SONAR_ORG_KEY = os.environ["SONAR_ORG_KEY"]
 SONAR_PROJECT_KEY = os.environ["SONAR_PROJECT_KEY"]
 SONAR_TOKEN = os.environ["SONAR_TOKEN"]
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
-GITHUB_OWNER = os.environ["GITHUB_OWNER_ENV"]
-GITHUB_REPO_NAME = os.environ["GITHUB_REPO_NAME_ENV"]
-GITHUB_ACCESS_TOKEN = "os.environ['GITHUB_ACCESS_TOKEN_ENV']"
-GITHUB_USERNAME = os.environ["GITHUB_USERNAME_ENV"]
-GITHUB_EMAIL = os.environ["GITHUB_EMAIL_ENV"]
+GITHUB_OWNER = os.environ["GITHUB_OWNER"]
+GITHUB_REPO_NAME = os.environ["GITHUB_REPO_NAME"]
+GITHUB_ACCESS_TOKEN = os.environ["GITHUB_TOKEN"]
+GITHUB_USERNAME = os.environ["GITHUB_USERNAME"]
+GITHUB_EMAIL = os.environ["GITHUB_EMAIL"]
 MAX_CYCLES = int(os.environ.get("MAX_CYCLES", 3))  # Default value is 3 cycles
 POLLING_INTERVAL = 15  # Seconds to wait between polling for new issues
 
@@ -37,8 +37,6 @@ def fetch_issues(sonar_token, source_directory, branch):
                     "organization": SONAR_ORG_KEY,
                     "projects": SONAR_PROJECT_KEY,
                     "types": "CODE_SMELL, BUG, VULNERABILITY",
-                    #"types": "BUG, VULNERABILITY",
-                    "branch": "main",
                     "statuses": "OPEN, CONFIRMED, REOPENED",
                     "p": page_index,
                 },
@@ -80,7 +78,6 @@ def fetch_issues(sonar_token, source_directory, branch):
         })
 
         page_index += 1
-    print(issues_by_file)
 
     return issues_by_file
 
@@ -119,44 +116,6 @@ def apply_suggested_fix(file_content, issue, suggested_fix):
     lines[issue_line : issue_line + len(suggested_lines)] = suggested_lines
 
     return '\n'.join(lines)
-
-# Implement fixes using the GPT-4 API for all issues at once
-def implement_fixes(issues_by_file):
-    openai.api_key = OPENAI_API_KEY
-
-    for file_path, issues in issues_by_file.items():
-        # Read the file contents
-        with open(file_path, 'r') as file:
-            file_content = file.read()
-
-        # Generate the prompt using the current file_content
-        prompt = generate_all_issues_prompt(file_content, issues)
-        print(f"\n")
-        print(f"\n****************************************************************************************************")
-        print(f"Generating suggestion for the following file: {file_path}")
-        print(f"\n")
-        print(f"Prompt: {prompt}")
-        try:
-            response = openai.Completion.create(
-                model="text-davinci-003",
-                prompt=prompt,
-                temperature=0,
-                max_tokens=3000,
-                top_p=1.0,
-                frequency_penalty=0.0,
-                presence_penalty=0.0,
-                stop=["###"]
-            )
-            suggested_fix = response.choices[0].text.strip()
-            print(f"Suggested fix for issues '{issues}': {response}")
-        except Exception as e:
-            print(f"Error: Failed to get a suggestion from GPT-4 for issues '{issues}': {str(e)}")
-            continue
-
-        # Write the suggested fix directly back to the file
-        with open(file_path, 'w') as file:
-            file.write(suggested_fix)
-            print(f"Updated file: {file_path}")
 
 def implement_fixes_gpt_3_5_turbo(issues_by_file):
     openai.api_key = OPENAI_API_KEY
@@ -260,9 +219,10 @@ def create_pr(base, head, title):
 
     return response.json()
 
-def setup_git_repo(tmp_dir):
+def setup_git_repo(tmp_dir, branch_name):
     repo_url = f'https://{GITHUB_ACCESS_TOKEN}@github.com/{GITHUB_OWNER}/{GITHUB_REPO_NAME}.git'
-    repo = Repo.clone_from(repo_url, tmp_dir, branch='main')
+    repo = Repo.clone_from(repo_url, tmp_dir, branch=branch_name)
+    print(f"GitHub URL: {repo_url}")
 
     # Fetch all remote branches
     repo.git.fetch("--all")
@@ -274,7 +234,7 @@ def setup_git_repo(tmp_dir):
 
 def create_and_checkout_new_branch(repo):
     current_time = datetime.now().strftime("%Y%m%d%H%M%S")
-    new_branch_name = f"fixes_{current_time}"
+    new_branch_name = f"test_single_run_fixes_{current_time}"
     new_branch = repo.create_head(new_branch_name)
     new_branch.checkout()
 
@@ -311,10 +271,10 @@ def main():
     print("\n")
     print("Starting the automated code fixer...")
     with tempfile.TemporaryDirectory() as tmp_dir:
-        repo = setup_git_repo(tmp_dir)
+        repo = setup_git_repo(tmp_dir, 'exp2')
         new_branch = create_and_checkout_new_branch(repo)
         issues_by_file = fetch_issues(SONAR_TOKEN, tmp_dir, "main")
-
+        print(f"Found {len(issues_by_file)} issues in the codebase")
         # Call apply_fixes_and_push_changes and check if changes were committed and pushed
         if not apply_fixes_and_push_changes(repo, new_branch):
             raise Exception("GPT-4 failed to fix an issue and returned the same code. Stopping execution.")               
